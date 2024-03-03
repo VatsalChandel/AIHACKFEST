@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import openai
 from flask_sqlalchemy import SQLAlchemy
 import os
+from datetime import datetime
+
 
 # Flask app setup
 app = Flask(__name__)
@@ -30,7 +32,8 @@ class UserHistory(db.Model):
     glucose_level = db.Column(db.Float)
     activity = db.Column(db.String(200))
     dibtype = db.Column(db.String(10))
-    
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow) 
+    assistance = db.Column(db.String(200))
 
 
 # Routes
@@ -48,7 +51,7 @@ def submit_login():
     session['user_gender'] = form_data['user_gender']
     session['user_medications'] = form_data['user_medications']
     session['user_diabetes'] = form_data['user_diabetes']
-    
+
     return redirect(url_for('index'))
 
 @app.route("/index")
@@ -63,23 +66,20 @@ def submit_activity():
     activity = request.form['activity']
     glucose = request.form['glucose']
     
-    # Generate assistance
-    assistance = generate_assistance(session, activity, glucose)
+    assistance = generate_assistance(session, activity, glucose) # ChatGPT gives Recs :) 
     
-    # Save user's history to the database
-    save_to_history(session, activity, glucose)
+    saved_assistance = assistance[:100] + "..." # sometimes shit is too long 
+    save_to_history(session, activity, glucose, saved_assistance)
     
     return render_template("assistance.html", assistance=assistance)
 
 @app.route("/history")
 def history():
-    # Retrieve user's history from the database
     history_entries = UserHistory.query.all()
     
     return render_template("history.html", history_entries=history_entries)
 
-def save_to_history(user_info, activity, glucose):
-    # Create a new UserHistory object
+def save_to_history(user_info, activity, glucose, assistance):
     new_entry = UserHistory(
         user_age=user_info['user_age'],
         user_height=user_info['user_height'],
@@ -87,17 +87,18 @@ def save_to_history(user_info, activity, glucose):
         user_gender=user_info['user_gender'],
         user_medications=user_info['user_medications'],
         glucose_level=float(glucose),
-        activity=activity
+        activity=activity,
+        assistance=assistance
     )
 
-    # Add the new entry to the database session and commit
     with app.app_context():
         db.session.add(new_entry)
         db.session.commit()
 
 def generate_assistance(user_info, activity, glucose):
-    prompt = f"My age is {user_info['user_age']}, height is {user_info['user_height']} inches, weight is {user_info['user_weight']} pounds, gender is {user_info['user_gender']}, medications I take are {user_info['user_medications']}, and I have {user_info['user_diabetes']} diabetes. In the last 30 minutes, I {activity} and my glucose level is {glucose}. Please provide assistance."
+    prompt = f"My age is {user_info['user_age']}, height is {user_info['user_height']} inches, weight is {user_info['user_weight']} pounds, gender is {user_info['user_gender']}, medications I take are {user_info['user_medications']}, and I have {user_info['user_diabetes']} diabetes. In the last 30 minutes, I {activity} and my glucose level is {glucose}. Please provide advice in 100 words or less ."
     print(prompt)
+    # Give chat hella boof training data and then shorten the answer 💀
     response = openai.ChatCompletion.create(
         engine=deployment_name,
         messages=[
