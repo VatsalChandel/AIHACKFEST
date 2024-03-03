@@ -18,11 +18,10 @@ deployment_name = "GPT35"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user_history.db'
 db = SQLAlchemy(app)
 
-
-
 # Define model for user history
 class UserHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(200))
     user_age = db.Column(db.Integer)
     user_height = db.Column(db.Integer)
     user_weight = db.Column(db.Integer)
@@ -30,6 +29,7 @@ class UserHistory(db.Model):
     user_medications = db.Column(db.String(100))
     glucose_level = db.Column(db.Float)
     activity = db.Column(db.String(200))
+    dibtype = db.Column(db.String(10))
     
 
 
@@ -41,6 +41,7 @@ def login():
 @app.route("/submit-login", methods=["POST"])
 def submit_login():
     form_data = request.form
+    session['user'] = form_data['user']
     session['user_age'] = form_data['user_age']
     session['user_height'] = form_data['user_height']
     session['user_weight'] = form_data['user_weight']
@@ -53,7 +54,7 @@ def submit_login():
 @app.route("/index")
 def index():
     if 'user_age' in session:
-        return render_template("index.html", user_age=session['user_age'], user_height=session['user_height'], user_weight=session['user_weight'], user_gender=session['user_gender'], user_medications=session['user_medications'], diabetes=session['user_diabetes'])
+        return render_template("index.html", user=session['user'], user_age=session['user_age'], user_height=session['user_height'], user_weight=session['user_weight'], user_gender=session['user_gender'], user_medications=session['user_medications'], diabetes=session['user_diabetes'])
     else:
         return redirect(url_for('login'))
 
@@ -95,8 +96,8 @@ def save_to_history(user_info, activity, glucose):
         db.session.commit()
 
 def generate_assistance(user_info, activity, glucose):
-    prompt = f"My age is {user_info['user_age']}, height is {user_info['user_height']} cm, weight is {user_info['user_weight']} kg, gender is {user_info['user_gender']}, medications I take are {user_info['user_medications']}. In the last 30 minutes, I {activity} and my glucose level is {glucose}. Please provide assistance."
-    
+    prompt = f"My age is {user_info['user_age']}, height is {user_info['user_height']} inches, weight is {user_info['user_weight']} pounds, gender is {user_info['user_gender']}, medications I take are {user_info['user_medications']}, and I have {user_info['user_diabetes']} diabetes. In the last 30 minutes, I {activity} and my glucose level is {glucose}. Please provide assistance."
+    print(prompt)
     response = openai.ChatCompletion.create(
         engine=deployment_name,
         messages=[

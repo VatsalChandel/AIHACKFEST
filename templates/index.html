@@ -2,31 +2,45 @@
 <html lang="en">
 <head>
     <title>Main Page</title>
+    <!-- Ensure the path to the CSS file is correct -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/logincss.css') }}">
 </head>
 <body>
-    <h1>Welcome to the Main Page</h1>
-    <p>User Information:</p>
-    <ul>
-        <li>Age: {{ user_age }}</li>
-        <li>Height: {{ user_height }} cm</li>
-        <li>Weight: {{ user_weight }} kg</li>
-        <li>Gender: {{ user_gender }}</li>
-        <li>Medications: {{ user_medications }}</li>
-        <li>Diabetes: {{ diabetes }}</li>
-    </ul>
+    <div class="profile-form-container">
+        <h2>Welcome to the Main Page {{ user }} </h2>
+        <div class="user-info">
+            <p>User Information:</p>
+            <ul>
+                <li>Age: {{ user_age }}</li>
+                <li>Height: {{ user_height }} cm</li>
+                <li>Weight: {{ user_weight }} kg</li>
+                <li>Gender: {{ user_gender }}</li>
+                <li>Medications: {{ user_medications }}</li>
+                <li>Diabetes: {{ diabetes }}</li>
+            </ul>
+        </div>
+        
+        <div class="activity-form">
+            <h2>What did you do in the last 30 minutes?</h2>
+            <form action="/submit-activity" method="post">
+                <div class="input-group">
+                    <input type="text" name="activity">
+                </div>
+                <div class="input-group">
+                    <label for="glucose">Glucose Level:</label>
+                    <input type="text" id="glucose" name="glucose">
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
 
-    <h2>What did you do in the last 30 minutes?</h2>
-    <form action="/submit-activity" method="post">
-        <textarea name="activity" rows="4" cols="50"></textarea><br>
-        <label for="glucose">Glucose Level:</label>
-        <input type="text" id="glucose" name="glucose"><br>
-        <input type="submit" value="Submit">
-    </form>
+        <div class="history-link">
+            <h2>History</h2>
+            <!-- The a tag is styled as a button -->
+            <a href="{{ url_for('history') }}" class="button">View History</a>
+        </div>
 
 
-    <h2>History</h2>
-    <a href="{{ url_for('history') }}">View History</a>
-
-    
+    </div>
 </body>
 </html>
