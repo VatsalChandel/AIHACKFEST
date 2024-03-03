@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>User History</title>
+</head>
+<body>
+    <h1>User History</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User Age</th>
+                <th>User Height</th>
+                <th>User Weight</th>
+                <th>User Gender</th>
+                <th>User Medications</th>
+                <th>Glucose Level</th>
+                <th>Activity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in history_entries %}
+            <tr>
+                <td>{{ entry.user_age }}</td>
+                <td>{{ entry.user_height }}</td>
+                <td>{{ entry.user_weight }}</td>
+                <td>{{ entry.user_gender }}</td>
+                <td>{{ entry.user_medications }}</td>
+                <td>{{ entry.glucose_level }}</td>
+                <td>{{ entry.activity }}</td>
+                <td>{{ entry.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('index') }}">Back to Main Page</a>
+
+</body>
+</html>

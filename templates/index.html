@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Main Page</title>
+</head>
+<body>
+    <h1>Welcome to the Main Page</h1>
+    <p>User Information:</p>
+    <ul>
+        <li>Age: {{ user_age }}</li>
+        <li>Height: {{ user_height }} cm</li>
+        <li>Weight: {{ user_weight }} kg</li>
+        <li>Gender: {{ user_gender }}</li>
+        <li>Medications: {{ user_medications }}</li>
+        <li>Diabetes: {{ diabetes }}</li>
+    </ul>
+
+    <h2>What did you do in the last 30 minutes?</h2>
+    <form action="/submit-activity" method="post">
+        <textarea name="activity" rows="4" cols="50"></textarea><br>
+        <label for="glucose">Glucose Level:</label>
+        <input type="text" id="glucose" name="glucose"><br>
+        <input type="submit" value="Submit">
+    </form>
+
+
+    <h2>History</h2>
+    <a href="{{ url_for('history') }}">View History</a>
+
+    
+</body>
+</html>
